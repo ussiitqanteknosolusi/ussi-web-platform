@@ -1,3 +1,5 @@
+import z from "zod";
+
 export const PricelistSchema = z.object({
   tier: z.enum(["Basic", "Professional", "Custom"], { required_error: "Tier harus dipilih" }),
   title: z.string().min(3, { message: "Judul minimal 3 karakter" }),

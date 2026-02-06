@@ -26,7 +26,7 @@ interface ProductFormProps {
     description: string | null;
     thumbnail: string | null;
     detailImage: string | null;
-    price: number | null;
+    price?: number | null;
     features: any;
     isActive: boolean;
   };

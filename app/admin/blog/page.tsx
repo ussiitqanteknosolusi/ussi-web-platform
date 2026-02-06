@@ -106,7 +106,6 @@ export default async function BlogAdminPage() {
                           onDelete={deletePost.bind(null, post.id)} 
                           title={`Hapus Artikel ${post.title}?`}
                           description="Tindakan ini tidak dapat dibatalkan. Artikel akan dihapus permanen."
-                          align="end"
                         />
                       </div>
                     </td>
