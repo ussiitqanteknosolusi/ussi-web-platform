@@ -1,6 +1,5 @@
 import { db } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import PricelistForm from "@/components/admin/PricelistForm";
 
 interface PageProps {
   params: Promise<{ id: string; pricelistId: string }>;
@@ -36,7 +35,6 @@ export default async function EditPricelistPage({ params }: PageProps) {
         </p>
       </div>
 
-      <PricelistForm serviceId={serviceId} initialData={pricelist} />
     </div>
   );
 }
