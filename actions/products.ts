@@ -17,28 +17,23 @@ export async function createProduct(formData: FormData) {
   const thumbnailFile = formData.get("thumbnail") as File | null;
   const detailImageFile = formData.get("detailImage") as File | null;
   
-  if (thumbnailFile && thumbnailFile.size > 0) {
-    try {
+  try {
+    if (thumbnailFile && thumbnailFile.size > 0) {
       thumbnailUrl = await uploadFile(thumbnailFile, "products");
       uploadedFiles.push(thumbnailUrl);
-    } catch (error) {
-      console.error("Upload Error:", error);
-      return { error: "Failed to upload thumbnail" };
     }
-  }
-  
-  if (detailImageFile && detailImageFile.size > 0) {
-    try {
+    
+    if (detailImageFile && detailImageFile.size > 0) {
       detailImageUrl = await uploadFile(detailImageFile, "products");
       uploadedFiles.push(detailImageUrl);
-    } catch (error) {
-      console.error("Upload Error:", error);
-      // Clean up previous upload if exists
-      if (uploadedFiles.length > 0) {
-        await Promise.all(uploadedFiles.map(file => deleteFile(file)));
-      }
-      return { error: "Failed to upload detail image" };
     }
+  } catch (error: any) {
+    console.error("Upload Error:", error);
+    // Cleanup any files uploaded before the error
+    if (uploadedFiles.length > 0) {
+      await Promise.all(uploadedFiles.map(file => deleteFile(file)));
+    }
+    return { error: error.message || "Failed to upload images" };
   }
 
   // Parse features from JSON string
@@ -66,18 +61,8 @@ export async function createProduct(formData: FormData) {
   const { name, slug, serviceId, description, features: validatedFeatures, isActive } = validatedFields.data;
 
   // Generate Slug safely and ensure uniqueness
-  let finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  
-  // Check for uniqueness
-  let slugExists = await db.product.findUnique({ where: { slug: finalSlug } });
-  let counter = 1;
-  const originalSlug = finalSlug;
-  
-  while (slugExists) {
-    finalSlug = `${originalSlug}-${counter}`;
-    slugExists = await db.product.findUnique({ where: { slug: finalSlug } });
-    counter++;
-  }
+  const baseSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const finalSlug = await generateUniqueSlug(baseSlug);
 
   try {
     await db.product.create({
@@ -103,6 +88,56 @@ export async function createProduct(formData: FormData) {
 
   revalidatePath("/admin/products");
   return { success: "Product created successfully!" };
+}
+
+// Helper function for optimized slug generation
+async function generateUniqueSlug(baseSlug: string): Promise<string> {
+  // Check if the exact slug exists
+  const exactMatch = await db.product.findUnique({
+    where: { slug: baseSlug },
+    select: { slug: true },
+  });
+
+  if (!exactMatch) return baseSlug;
+
+  // Find all slugs that start with baseSlug + "-"
+  // We use a raw query or a startsWith filter to find collisions in one go
+  const collisions = await db.product.findMany({
+    where: {
+      slug: {
+        startsWith: `${baseSlug}-`,
+      },
+    },
+    select: { slug: true },
+  });
+
+  // Extract suffixes and find the next available number
+  const suffixes = collisions
+    .map((p) => {
+      const parts = p.slug.split(`${baseSlug}-`);
+      return parseInt(parts[1]);
+    })
+    .filter((n) => !isNaN(n))
+    .sort((a, b) => a - b);
+
+  let nextNumber = 1;
+  for (const n of suffixes) {
+    if (n === nextNumber) {
+      nextNumber++;
+    } else if (n > nextNumber) {
+      // If we find a gap, use it (optional, but simply incrementing max is safer/easier)
+      break; 
+    }
+  }
+  
+  // Actually, strictly incrementing from max is safer to avoid race conditions filling gaps,
+  // but strictly appending nextNumber is standard.
+  // Let's just find the max and add 1.
+  if (suffixes.length > 0) {
+      nextNumber = suffixes[suffixes.length - 1] + 1;
+  }
+
+  return `${baseSlug}-${nextNumber}`;
 }
 
 
@@ -165,28 +200,37 @@ export async function updateProduct(id: number, formData: FormData) {
 
   const { name, slug, serviceId, description, features: validatedFeatures, isActive } = validatedFields.data;
 
-  try {
-    // Get existing product to check for old images
-    const existingProduct = await db.product.findUnique({
-      where: { id },
-    });
+  // Get existing product first to check for existence and handle slug/image logic
+  const existingProduct = await db.product.findUnique({ where: { id } });
 
-    if (!existingProduct) {
+  if (!existingProduct) {
       // Rollback uploads if product not found
       if (uploadedFiles.length > 0) {
         await Promise.all(uploadedFiles.map(file => deleteFile(file)));
       }
       return { error: "Product not found" };
-    }
+  }
 
+  // Determine if slug needs updating
+  let slugToUpdate: string | undefined = undefined;
+  if (slug && slug !== existingProduct.slug) {
+      // If a new slug is explicitly provided and different, optimize it
+      slugToUpdate = await generateUniqueSlug(slug);
+  }
+
+  try {
     // Prepare update data
     const updateData: any = {
         name,
-        slug,
         serviceId,
         description,
         features: validatedFeatures || [],
         isActive,
+    }
+
+    // Only add slug to update if it changed
+    if (slugToUpdate) {
+        updateData.slug = slugToUpdate;
     }
 
     if (thumbnailUrl) updateData.thumbnail = thumbnailUrl;
@@ -205,13 +249,13 @@ export async function updateProduct(id: number, formData: FormData) {
       await deleteFile(existingProduct.detailImage);
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Database Error:", error);
     // Rollback NEW uploads on database error
     if (uploadedFiles.length > 0) {
       await Promise.all(uploadedFiles.map(file => deleteFile(file)));
     }
-    return { error: "Database Error: Failed to update product." };
+    return { error: `Database Error: ${error.message || "Failed to update product."}` };
   }
 
   revalidatePath("/admin/products");
