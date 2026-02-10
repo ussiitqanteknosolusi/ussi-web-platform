@@ -16,7 +16,6 @@ const products = [
     icon: Server,
     image: "/images/products/IBS-core.png",
     color: "text-primary",
-    href: "/products/ibs-core",
   },
   {
     title: "IBS LITE",
@@ -24,7 +23,6 @@ const products = [
     icon: CreditCard,
     image: "/images/products/IBS-LITE.png",
     color: "text-blue-600",
-    href: "/products/ibs-lite",
   },
   {
     title: "IBS MOBILE",
@@ -32,7 +30,6 @@ const products = [
     icon: Smartphone,
     image: "/images/products/ibs-mobile.png",
     color: "text-accent",
-    href: "/products/ibs-mobile",
   },
   {
     title: "WA MASKING",
@@ -40,7 +37,6 @@ const products = [
     icon: MessageSquare,
     image: "/images/products/wa-masking.png",
     color: "text-green-600",
-    href: "/products/wa-masking",
   },
   {
     title: "SMS MASKING",
@@ -48,7 +44,6 @@ const products = [
     icon: Mail,
     image: "/images/products/sms-masking.png",
     color: "text-orange-600",
-    href: "/products/sms-masking",
   },
 ];
 
@@ -104,7 +99,6 @@ export default function BentoGrid() {
                   key={product.title} 
                   className="flex-[0_0_85%] md:flex-[0_0_45%] lg:flex-[0_0_calc(33.333%-1rem)] min-w-0 pl-4"
                 >
-                  <Link href={product.href} className="block h-full group">
                     <Card className="h-full border-border/50 bg-card hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden relative flex flex-col">
                       {/* Decorative Line */}
                       <div className={cn(
@@ -143,7 +137,6 @@ export default function BentoGrid() {
                         </div>
                       </div>
                     </Card>
-                  </Link>
                 </div>
               ))}
             </div>
