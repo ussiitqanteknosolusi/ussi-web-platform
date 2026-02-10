@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { name: "Tentang Perusahaan", href: "/about" },
+  { name: "Tentang Perusahaan", href: "/tentang-kami" },
   { name: "Layanan", href: "/layanan", hasDropdown: true },
-  { name: "Klien", href: "/clients" },
-  { name: "Portofolio", href: "/portfolio" },
-  { name: "Blog", href: "/blog" },
-  { name: "Hubungi Kami", href: "/contact" },
+  { name: "Klien", href: "/klien" },
+  { name: "Portofolio", href: "/portofolio" },
+  { name: "Blog", href: "/artikel" },
+  { name: "Hubungi Kami", href: "/hubungi-kami" },
 ];
 
 interface NavbarProps {
@@ -157,14 +157,14 @@ export function Navbar({ user }: NavbarProps) {
                </Button>
             </div>
           ) : (
-            <>
+            <div className="flex items-center gap-4">
               <Button asChild size="sm" variant="outline" className="text-foreground">
                  <Link href="/auth/login">Masuk</Link>
               </Button>
               <Button asChild size="sm">
                  <Link href="/contact">Demo Gratis</Link>
               </Button>
-            </>
+            </div>
           )}
         </nav>
 

@@ -74,6 +74,26 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   const features = Array.isArray(product.features) ? product.features : [];
 
+  const jsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.name,
+    image: product.detailImage ? `${process.env.NEXT_PUBLIC_APP_URL}${product.detailImage}` : undefined,
+    description: product.description,
+    brand: {
+      "@type": "Brand",
+      name: "USSI ITS"
+    },
+    offers: {
+      "@type": "AggregateOffer",
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/layanan/${slug}/${productSlug}`,
+      priceCurrency: "IDR",
+      lowPrice: product.prices[0]?.price ? Number(product.prices[0].price) : 0,
+      offerCount: product.prices.length,
+      availability: "https://schema.org/InStock"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pt-32 pb-20">
       <div className="container mx-auto px-4 md:px-6">
@@ -243,6 +263,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     </div>
   );
 }

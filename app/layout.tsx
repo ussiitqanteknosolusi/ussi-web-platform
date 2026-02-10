@@ -57,6 +57,31 @@ export default async function RootLayout({
       <body
         className={`font-sans antialiased overflow-x-hidden w-full max-w-full`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "USSI ITS",
+              url: process.env.NEXT_PUBLIC_APP_URL || "https://ussiits.com",
+              logo: `${process.env.NEXT_PUBLIC_APP_URL || "https://ussiits.com"}/logo.png`,
+              contactPoint: {
+                "@type": "ContactPoint",
+                telephone: "+62 877 8712 5466",
+                contactType: "customer service",
+                areaServed: "ID",
+                availableLanguage: "Indonesian"
+              },
+              sameAs: [
+                "https://www.instagram.com/ussiits/",
+                "https://www.facebook.com/USSIITS",
+                "https://www.youtube.com/channel/UCHEWHOhcd18-Vn9bkqvUIfA",
+                "https://www.tiktok.com/@itqantechnosolution"
+              ]
+            })
+          }}
+        />
         <NextTopLoader 
           color="#DC143C"
           initialPosition={0.08}

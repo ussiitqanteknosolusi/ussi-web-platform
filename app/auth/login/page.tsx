@@ -149,23 +149,7 @@ export default function LoginPage() {
                     </form>
                 </Form>
             </div>
-            {/* Footer inside card if needed, or outside */}
         </Card>
-
-        {/* Footer Links */}
-        <div className="flex justify-between text-sm text-slate-500 px-2">
-            <Link href="/terms" className="hover:text-slate-800 transition-colors">
-                Syarat & Ketentuan
-            </Link>
-            <div className="flex gap-4">
-                <Link href="/privacy" className="hover:text-slate-800 transition-colors">
-                    Privasi
-                </Link>
-                <Link href="/help" className="hover:text-slate-800 transition-colors">
-                    Bantuan
-                </Link>
-            </div>
-        </div>
       </div>
     </div>
   );

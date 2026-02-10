@@ -4,7 +4,7 @@ const next = require('next');
 
 // Konfigurasi Environment
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = '0.0.0.0'; // Kita paksa ke localhost agar lebih stabil di Hostinger
+const hostname = '127.0.0.1'; // Kita paksa ke localhost agar lebih stabil di Hostinger
 const port = process.env.PORT || 3000;
 
 // Inisialisasi Next.js
