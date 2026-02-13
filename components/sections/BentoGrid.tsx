@@ -114,6 +114,7 @@ export default function BentoGrid() {
                           alt={product.title}
                           fill
                           className="object-contain transition-transform duration-700 group-hover:scale-110 drop-shadow-md"
+                          sizes="(max-width: 768px) 85vw, (max-width: 1200px) 45vw, 33vw"
                         />
                       </div>
 

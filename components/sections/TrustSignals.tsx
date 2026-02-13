@@ -1,7 +1,8 @@
 import { db } from "@/lib/prisma";
 import Image from "next/image";
+import { unstable_cache } from "next/cache";
 
-// Revalidate every hour OR on-demand when client added
+// ✅ PERFORMANCE: Cache client logos for 1 hour via ISR
 export const revalidate = 3600; 
 
 const stats = [
@@ -12,12 +13,21 @@ const stats = [
   { label: "Total", value: "1.730+" },
 ];
 
+// ✅ PERFORMANCE: Cache client query separately so it's shared across pages
+const getCachedClients = unstable_cache(
+  async () => {
+    return db.client.findMany({
+      where: { logoUrl: { not: null } },
+      orderBy: { isFeatured: "desc" },
+      select: { name: true, logoUrl: true },
+    });
+  },
+  ["trust-signal-clients"],
+  { revalidate: 3600, tags: ["clients"] }
+);
+
 export default async function TrustSignals() {
-  const clients = await db.client.findMany({
-    where: { logoUrl: { not: null } },
-    orderBy: { isFeatured: "desc" }, // Featured clients first
-    select: { name: true, logoUrl: true },
-  });
+  const clients = await getCachedClients();
 
   // If few clients, duplicate them to make marquee smooth
   const displayClients = clients.length > 0 
@@ -71,6 +81,7 @@ export default async function TrustSignals() {
                           fill 
                           className="object-contain"
                           sizes="(max-width: 768px) 112px, 160px"
+                          loading="lazy"
                         />
                     )}
                   </div>

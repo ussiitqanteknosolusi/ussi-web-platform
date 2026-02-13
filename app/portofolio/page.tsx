@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+// ✅ PERFORMANCE: ISR — revalidate every 5 minutes
+export const revalidate = 300;
+
 export const metadata = {
   title: "Portofolio | USSI ITS",
   description: "Lihat hasil karya dan proyek yang telah kami kerjakan untuk berbagai klien di industri keuangan mikro.",
@@ -71,7 +74,7 @@ export default async function PortfolioPage({
             variant={!categorySlug ? "default" : "outline"}
             className="rounded-full whitespace-nowrap flex-shrink-0"
           >
-            <Link href="/portfolio">Semua Project</Link>
+            <Link href="/portofolio">Semua Project</Link>
           </Button>
           {services.map((service) => (
             <Button
@@ -80,7 +83,7 @@ export default async function PortfolioPage({
               variant={categorySlug === service.slug ? "default" : "outline"}
               className="rounded-full whitespace-nowrap flex-shrink-0"
             >
-              <Link href={`/portfolio?category=${service.slug}`}>
+              <Link href={`/portofolio?category=${service.slug}`}>
                 {service.title}
               </Link>
             </Button>
@@ -92,7 +95,7 @@ export default async function PortfolioPage({
             <p className="text-xl">Belum ada portofolio yang ditampilkan untuk kategori ini.</p>
             {categorySlug && (
                 <Button variant="link" asChild className="mt-4">
-                    <Link href="/portfolio">Lihat Semua Project</Link>
+                    <Link href="/portofolio">Lihat Semua Project</Link>
                 </Button>
             )}
           </div>
@@ -111,6 +114,7 @@ export default async function PortfolioPage({
                       alt={project.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground bg-secondary/20">
@@ -119,7 +123,7 @@ export default async function PortfolioPage({
                   )}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <Button asChild variant="secondary" className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                      <Link href={`/portfolio/${project.slug}`}>Lihat Detail</Link>
+                      <Link href={`/portofolio/${project.slug}`}>Lihat Detail</Link>
                     </Button>
                   </div>
                 </div>
@@ -140,7 +144,7 @@ export default async function PortfolioPage({
                   </div>
 
                   <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                    <Link href={`/portfolio/${project.slug}`}>
+                    <Link href={`/portofolio/${project.slug}`}>
                         {project.title}
                     </Link>
                   </h3>
@@ -157,7 +161,7 @@ export default async function PortfolioPage({
 
                   <div className="mt-auto pt-4 border-t border-border">
                     <Link 
-                      href={`/portfolio/${project.slug}`}
+                      href={`/portofolio/${project.slug}`}
                       className="inline-flex items-center text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
                     >
                       Pelajari Selengkapnya <ArrowRight className="ml-2 h-4 w-4" />

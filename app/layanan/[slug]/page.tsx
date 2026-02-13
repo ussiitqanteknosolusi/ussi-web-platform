@@ -7,6 +7,9 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 
+// ✅ PERFORMANCE: ISR — revalidate every 5 minutes
+export const revalidate = 300;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -70,6 +73,7 @@ export default async function ServiceDetailPage({ params }: PageProps) {
                 alt={service.title}
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
                 priority
               />
             ) : (

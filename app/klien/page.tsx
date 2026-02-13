@@ -1,4 +1,5 @@
 import { db } from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
 import TrustSignals from "@/components/sections/TrustSignals";
 import {
   Table,
@@ -13,6 +14,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 const ITEMS_PER_PAGE = 20;
+
+// ✅ PERFORMANCE: ISR — revalidate every 5 minutes
+export const revalidate = 300;
 
 export const metadata = {
     title: "Klien Kami | USSI ITS",
@@ -100,7 +104,7 @@ export default async function ClientsPage({
                         disabled={currentPage <= 1}
                         asChild
                     >
-                        <Link href={`/clients?page=${currentPage - 1}`}>
+                        <Link href={`/klien?page=${currentPage - 1}`}>
                              <ChevronLeft className="h-4 w-4 mr-2" /> Sebelumnya
                         </Link>
                     </Button>
@@ -113,7 +117,7 @@ export default async function ClientsPage({
                         disabled={currentPage >= totalPages}
                         asChild
                     >
-                         <Link href={`/clients?page=${currentPage + 1}`}>
+                         <Link href={`/klien?page=${currentPage + 1}`}>
                              Selanjutnya <ChevronRight className="h-4 w-4 ml-2" />
                          </Link>
                     </Button>

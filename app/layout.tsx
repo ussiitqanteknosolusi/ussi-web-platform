@@ -1,16 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 import { getSiteSettings } from "@/lib/settings";
 
@@ -23,11 +12,6 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: "/favicon.ico",
     },
-    viewport: {
-      width: "device-width",
-      initialScale: 1,
-      maximumScale: 5,
-    },
     openGraph: {
       title: settings.site_title,
       description: settings.site_description,
@@ -37,11 +21,19 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// ✅ PERFORMANCE: viewport is static, export separately to avoid dynamic rendering
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 import { Navbar } from "@/components/layout/Navbar";
 import { FooterWrapper } from "@/components/layout/FooterWrapper";
 import { Footer } from "@/components/layout/Footer";
 import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { Suspense } from "react";
 
 import NextTopLoader from "nextjs-toploader";
 
@@ -53,7 +45,7 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <html lang="en" className="max-w-full w-full overflow-x-hidden">
+    <html lang="id" className="max-w-full w-full overflow-x-hidden">
       <body
         className={`font-sans antialiased overflow-x-hidden w-full max-w-full`}
       >
@@ -94,7 +86,9 @@ export default async function RootLayout({
           shadow="0 0 10px #DC143C,0 0 5px #DC143C"
         />
         <Navbar user={session?.user} />
-        {children}
+        <Suspense>
+          {children}
+        </Suspense>
         <FooterWrapper>
           <Footer />
         </FooterWrapper>

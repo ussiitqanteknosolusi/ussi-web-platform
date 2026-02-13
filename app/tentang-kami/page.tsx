@@ -1,10 +1,18 @@
-"use client";
-
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Users, Zap, Shield, Target, History } from "lucide-react";
 import Link from "next/link";
+
+// ✅ PERFORMANCE: Removed "use client" — this page is 100% static content,
+// no interactivity needed. Now renders as a Server Component (zero JS sent to client).
+// ✅ ISR: Revalidate every 24 hours (content almost never changes)
+export const revalidate = 86400;
+
+export const metadata = {
+  title: "Tentang Perusahaan | USSI ITS",
+  description: "Jembatan Teknologi Keuangan Mikro Indonesia. Sejak 2004, kami mendedikasikan diri untuk memajukan BPR, Koperasi, dan LKM.",
+};
 
 export default function AboutPage() {
   return (
@@ -23,22 +31,18 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* The Story / "We're here because..." */}
+      {/* The Story */}
       <section className="py-20">
         <div className="container px-4 md:px-6">
           <div className="grid md:grid-cols-2 gap-12 items-center">
              <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-left-6 duration-700">
-                {/* Placeholder for About Image - could use one of the products or a new upload later */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 z-0" />
-                <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                    <History className="h-20 w-20 text-muted-foreground/20" />
-                </div>
-                {/* Use Hero image for now if available or keep placeholder layout */}
                 <Image 
                   src="/images/documentations/ussi-bukber.jpg" 
                   alt="USSI Team"
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
              </div>
              <div className="space-y-6 animate-in fade-in slide-in-from-right-6 duration-700">
@@ -112,7 +116,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Core Values / Why Us */}
+      {/* Core Values */}
       <section className="py-24">
         <div className="container px-4 md:px-6 text-center">
            <h2 className="text-3xl font-bold mb-16">Nilai Inti USSI</h2>
@@ -157,10 +161,10 @@ export default function AboutPage() {
            </p>
            <div className="flex justify-center gap-4">
              <Button size="lg" asChild>
-               <Link href="/products">Lihat Produk</Link>
+               <Link href="/layanan">Lihat Produk</Link>
              </Button>
              <Button size="lg" variant="outline" asChild>
-               <Link href="/contact">Hubungi Tim Sales</Link>
+               <Link href="/hubungi-kami">Hubungi Tim Sales</Link>
              </Button>
            </div>
         </div>

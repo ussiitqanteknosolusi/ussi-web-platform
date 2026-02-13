@@ -1,16 +1,45 @@
 import Link from "next/link";
 import Image from "next/image";
 import { db } from "@/lib/prisma";
-import { Button } from "@/components/ui/button";
+import { unstable_cache } from "next/cache";
 
-export const dynamic = "force-dynamic";
+// ✅ PERFORMANCE: Changed from force-dynamic to ISR (revalidate every 5 min)
+// Blog posts don't change every second — ISR serves cached HTML and refreshes in background
+export const revalidate = 300;
+
+export const metadata = {
+  title: "Blog & Artikel | USSI ITS",
+  description: "Wawasan terbaru seputar teknologi perbankan, digitalisasi koperasi, dan tips IT untuk lembaga keuangan mikro.",
+};
+
+// ✅ PERFORMANCE: Cache blog posts query
+const getCachedPosts = unstable_cache(
+  async () => {
+    return db.post.findMany({
+      where: { status: "published" },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        coverImage: true,
+        createdAt: true,
+        // ✅ PAYLOAD OPTIMIZATION: Only select needed author fields, not entire author object
+        author: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+  },
+  ["published-posts"],
+  { revalidate: 300, tags: ["posts"] }
+);
 
 export default async function BlogPage() {
-  const posts = await db.post.findMany({
-    where: { status: "published" },
-    orderBy: { createdAt: "desc" },
-    include: { author: true },
-  });
+  const posts = await getCachedPosts();
 
   return (
     <div className="container mx-auto px-4 pt-24 md:pt-32 pb-12 md:pb-20">
@@ -26,7 +55,7 @@ export default async function BlogPage() {
           {posts.map((post) => (
             <Link 
               key={post.id} 
-              href={`/blog/${post.slug}`}
+              href={`/artikel/${post.slug}`}
               className="group flex flex-col bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300"
             >
               <div className="relative aspect-[16/9] w-full bg-muted">
@@ -36,6 +65,7 @@ export default async function BlogPage() {
                     alt={post.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -53,7 +83,7 @@ export default async function BlogPage() {
                   {post.title}
                 </h2>
                 <p className="text-muted-foreground text-sm line-clamp-3 mb-6 flex-1">
-                  {post.excerpt || post.content.substring(0, 150) + "..."}
+                  {post.excerpt || ""}
                 </p>
                 <div className="mt-auto">
                   <span className="text-sm font-medium text-primary flex items-center gap-1">

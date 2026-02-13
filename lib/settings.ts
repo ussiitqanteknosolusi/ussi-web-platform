@@ -41,11 +41,12 @@ async function fetchSettingsFromDB(): Promise<Record<string, string>> {
   }
 }
 
-// Cached version for better performance (revalidates when settings are updated)
+// ✅ PERFORMANCE: Cache for 5 minutes (300s) instead of 60s
+// This means only ~288 DB queries/day instead of ~1440
 export const getSettingsFromDB = unstable_cache(
   fetchSettingsFromDB,
   ["site-settings"],
-  { revalidate: 60, tags: ["settings"] } // Cache for 60 seconds, can be invalidated via tag
+  { revalidate: 300, tags: ["settings"] }
 );
 
 // Get a single setting value with fallback to default
