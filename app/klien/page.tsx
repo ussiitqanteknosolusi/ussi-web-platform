@@ -34,9 +34,14 @@ export default async function ClientsPage({
 
   const [clients, totalClients] = await Promise.all([
     db.client.findMany({
-      orderBy: { createdAt: "desc" }, // Or name: 'asc' if preferred, but usually latest first or alphabetical
+      orderBy: { createdAt: "desc" },
       take: ITEMS_PER_PAGE,
       skip: skip,
+      select: {
+        id: true,
+        name: true,
+        industry: true,
+      },
     }),
     db.client.count(),
   ]);

@@ -5,7 +5,13 @@ export default async function ProductsPage() {
   const projects = await db.project.findMany({
     where: { status: "Completed" },
     orderBy: { projectDate: "desc" },
-    include: { service: true }
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      thumbnailUrl: true,
+      service: { select: { slug: true, title: true } },
+    },
   });
 
   // Transform DB data to UI format

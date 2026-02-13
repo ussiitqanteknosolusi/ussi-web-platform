@@ -10,6 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const post = await db.post.findUnique({
     where: { slug },
+    select: { title: true, metaDescription: true, excerpt: true },
   });
 
   if (!post) {
@@ -46,6 +47,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     },
     orderBy: { createdAt: "desc" },
     take: 3,
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      coverImage: true,
+    },
   });
 
   return (

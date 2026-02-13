@@ -14,10 +14,15 @@ export default async function LayananPage() {
   const [services, settings] = await Promise.all([
     db.service.findMany({
       where: { isActive: true },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        heroImage: true,
         _count: {
           select: { products: true }
-        }
+        },
       },
       orderBy: { createdAt: "asc" },
     }),

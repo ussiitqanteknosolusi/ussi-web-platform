@@ -8,7 +8,14 @@ import DeleteButton from "@/components/admin/DeleteButton";
 export default async function BlogAdminPage() {
   const posts = await db.post.findMany({
     orderBy: { createdAt: "desc" },
-    include: { author: true },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      status: true,
+      createdAt: true,
+      author: { select: { name: true } },
+    },
   });
 
   return (

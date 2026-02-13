@@ -5,11 +5,18 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { deleteClient } from "@/actions/clients";
 import DeleteButton from "@/components/admin/DeleteButton";
-import { Client } from "@prisma/client";
+
 
 export default async function ClientsPage() {
   const clients = await db.client.findMany({
     orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      industry: true,
+      logoUrl: true,
+      isFeatured: true,
+    },
   });
 
   return (
@@ -46,7 +53,7 @@ export default async function ClientsPage() {
                 </td>
               </tr>
             ) : (
-              clients.map((client: Client) => (
+              clients.map((client) => (
                 <tr key={client.id} className="border-t hover:bg-muted/30">
                   <td className="p-4">
                     {client.logoUrl ? (

@@ -18,7 +18,14 @@ import DeleteButton from "@/components/admin/DeleteButton";
 export default async function AdminProjectsPage() {
   const projects = await db.project.findMany({
     orderBy: { createdAt: "desc" },
-    include: { client: true },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      status: true,
+      thumbnailUrl: true,
+      client: { select: { name: true } },
+    },
   });
 
   return (

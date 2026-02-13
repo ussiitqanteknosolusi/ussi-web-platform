@@ -29,7 +29,9 @@ export type SiteSettings = typeof siteDefaults;
 // Fetch settings from database
 async function fetchSettingsFromDB(): Promise<Record<string, string>> {
   try {
-    const settings = await db.setting.findMany();
+    const settings = await db.setting.findMany({
+      select: { keyName: true, value: true },
+    });
     const settingsMap: Record<string, string> = {};
     settings.forEach((s) => {
       settingsMap[s.keyName] = s.value;

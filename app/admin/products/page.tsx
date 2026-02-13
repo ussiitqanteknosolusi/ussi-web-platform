@@ -7,7 +7,13 @@ import DeleteButton from "@/components/admin/DeleteButton";
 
 export default async function ProductsPage() {
   const products = await db.product.findMany({
-    include: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true, // Short descriptions shown in list
+      isActive: true,
+      serviceId: true,
       service: {
         select: {
           id: true,

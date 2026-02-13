@@ -27,7 +27,14 @@ export default async function AdminUsersPage() {
   const [users, clients] = await Promise.all([
     db.user.findMany({
       orderBy: { createdAt: "desc" },
-      include: { client: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        client: { select: { name: true } },
+      },
     }),
     db.client.findMany({
       orderBy: { name: "asc" },

@@ -14,6 +14,17 @@ export async function GET() {
       orderBy: {
         createdAt: "desc",
       },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        phone: true,
+        companyName: true,
+        message: true,
+        status: true,
+        createdAt: true,
+      },
+      take: 100, // ✅ PAGINATION: Limit to latest 100 inquiries
     });
 
     // Map database fields to frontend expected fields

@@ -8,6 +8,12 @@ import DeleteButton from "@/components/admin/DeleteButton";
 export default async function ServicesPage() {
   const services = await db.service.findMany({
     orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      isActive: true,
+    },
   });
 
   return (

@@ -39,14 +39,25 @@ export default async function PortfolioPage({
       orderBy: {
         projectDate: "desc",
       },
-      include: {
-        client: true,
-        service: true,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        thumbnailUrl: true,
+        projectDate: true,
+        client: { select: { name: true } },
+        service: { select: { title: true, slug: true } },
       },
     }),
     db.service.findMany({
       where: {
         isActive: true,
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
       },
       orderBy: {
         title: "asc",
