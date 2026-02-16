@@ -11,7 +11,7 @@ export const revalidate = 86400;
 
 export const metadata = {
   title: "Tentang Perusahaan | USSI ITS",
-  description: "Jembatan Teknologi Keuangan Mikro Indonesia. Sejak 2004, kami mendedikasikan diri untuk memajukan BPR, Koperasi, dan LKM.",
+  description: "Jembatan Teknologi Keuangan Mikro Indonesia. Sejak 2017, kami mendedikasikan diri untuk memajukan BPR, Koperasi, dan LKM.",
 };
 
 export default function AboutPage() {
@@ -25,7 +25,7 @@ export default function AboutPage() {
               Jembatan Teknologi Keuangan Mikro Indonesia
             </h1>
             <p className="text-xl text-muted-foreground mt-6">
-              Sejak 2004, kami mendedikasikan diri untuk memajukan BPR, Koperasi, dan LKM melalui solusi bank digital yang handal dan terintegrasi.
+              Sejak 2017, kami mendedikasikan diri untuk memajukan BPR, Koperasi, dan LKM melalui solusi bank digital yang handal dan terintegrasi.
             </p>
           </div>
         </div>

@@ -162,7 +162,7 @@ export function Navbar({ user }: NavbarProps) {
                  <Link href="/auth/login">Masuk</Link>
               </Button>
               <Button asChild size="sm">
-                 <Link href="/contact">Demo Gratis</Link>
+                 <Link href="/hubungi-kami">Demo Gratis</Link>
               </Button>
             </div>
           )}
