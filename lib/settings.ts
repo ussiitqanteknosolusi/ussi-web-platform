@@ -9,9 +9,9 @@ export const siteDefaults = {
   footer_text: "PT USSI ItQan Tekno Solusi",
   
   // Contact
-  contact_email: "contact@ussiits.com",
+  contact_email: "ussi.itqanteknosolusi@gmail.com",
   contact_phone: "+62 877 8712 5466",
-  contact_address: "Gedung Research Center ITS Lt. 2, Jl. Teknik Mesin No. 163, Keputih, Sukolilo, Surabaya 60111",
+  contact_address: "Jl. Pasirlayung Barat No.119, Padasuka, Kec. Cimenyan, Kabupaten Bandung, Jawa Barat 40911",
   whatsapp_number: "6287787125466",
   whatsapp_url: "https://wa.me/6287787125466?text=Halo%20USSI%20ITS%2C%20saya%20ingin%20bertanya",
   
