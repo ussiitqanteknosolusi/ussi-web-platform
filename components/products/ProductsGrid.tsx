@@ -14,7 +14,7 @@ interface Product {
   slug: string;
   description: string | null;
   thumbnail: string | null;
-  features: any;
+  features: unknown;
 }
 
 interface ProductsGridProps {

@@ -1,7 +1,7 @@
 import { db } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { deleteService } from "@/actions/services";
 import DeleteButton from "@/components/admin/DeleteButton";
 
@@ -45,7 +45,7 @@ export default async function ServicesPage() {
             {services.length === 0 ? (
               <tr>
                 <td colSpan={4} className="text-center p-8 text-muted-foreground">
-                  Belum ada service. Klik "Tambah Service" untuk membuat yang pertama.
+                  Belum ada service. Klik &quot;Tambah Service&quot; untuk membuat yang pertama.
                 </td>
               </tr>
             ) : (

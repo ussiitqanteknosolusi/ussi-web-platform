@@ -22,7 +22,7 @@ export default async function PortfolioPage({
   const categorySlug = resolvedSearchParams.category;
 
   // Build the where clause
-  const where: any = {
+  const where: Record<string, unknown> = {
     status: "Completed",
   };
 

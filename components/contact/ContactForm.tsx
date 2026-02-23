@@ -44,7 +44,7 @@ export function ContactForm() {
         form.reset();
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
-    } catch (err) {
+    } catch {
       setError("Terjadi kesalahan, silakan coba lagi.");
     }
   };

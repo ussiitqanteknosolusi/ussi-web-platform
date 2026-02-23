@@ -69,7 +69,7 @@ export default function ServiceForm({ initialData }: ServiceFormProps) {
           setOpenConfirm(false);
           router.push("/admin/services");
         }
-      } catch (e) {
+      } catch {
         toast.error("Something went wrong!");
         setOpenConfirm(false);
       }

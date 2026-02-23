@@ -26,7 +26,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  role: string | any;
+  role: string;
   clientId: number | null;
 }
 

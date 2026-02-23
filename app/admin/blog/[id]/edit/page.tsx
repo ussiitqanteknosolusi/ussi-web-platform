@@ -25,7 +25,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Edit Artikel</h1>
         <p className="text-muted-foreground">
-          Perbarui konten artikel "{post.title}"
+          Perbarui konten artikel &quot;{post.title}&quot;
         </p>
       </div>
       <PostForm initialData={formattedPost} />

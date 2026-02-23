@@ -15,8 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Card, CardContent } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { login } from "@/actions/login";
@@ -24,9 +23,7 @@ import { login } from "@/actions/login";
 import { LoginSchema } from "@/schemas";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -45,7 +42,6 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof LoginSchema>) {
     setError("");
-    setSuccess("");
     
     setIsLoading(true);
     
@@ -55,7 +51,7 @@ export default function LoginPage() {
             form.reset();
             setError(data.error);
         }
-    } catch (e) {
+    } catch {
         setError("Something went wrong!");
     } finally {
         setIsLoading(false);

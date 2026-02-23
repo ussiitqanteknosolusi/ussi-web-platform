@@ -1,6 +1,7 @@
 "use client";
 
 import RichTextEditor from "./RichTextEditor";
+import Image from "next/image";
 import { useTransition, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,7 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-export default function PostForm({ initialData, categories = [] }: PostFormProps) {
+export default function PostForm({ initialData }: PostFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [status, setStatus] = useState<string>(initialData?.status || "draft");
@@ -80,7 +81,7 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
            setOpenConfirm(false);
            router.push("/admin/blog");
         }
-      } catch (error) {
+      } catch {
         toast.error("Something went wrong");
         setOpenConfirm(false);
       }
@@ -163,9 +164,11 @@ export default function PostForm({ initialData, categories = [] }: PostFormProps
                 {initialData?.coverImage && (
                   <div className="mt-2">
                     <p className="text-xs text-muted-foreground mb-1">Current:</p>
-                    <img 
+                    <Image 
                         src={initialData.coverImage} 
                         alt="Cover" 
+                        width={400}
+                        height={128}
                         className="w-full h-32 object-cover rounded-md border"
                     />
                   </div>

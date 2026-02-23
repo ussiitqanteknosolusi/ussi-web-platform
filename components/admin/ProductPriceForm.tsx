@@ -15,7 +15,7 @@ interface ProductPriceFormProps {
     id: number;
     name: string;
     price: number | object;
-    features: any;
+    features: unknown;
     whatsappUrl: string | null;
     isBestValue: boolean;
     displayOrder: number;

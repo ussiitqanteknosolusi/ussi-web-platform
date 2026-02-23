@@ -40,19 +40,20 @@ export async function withRetry<T>(
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       return await fn();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const prismaError = error as { code?: string; message?: string };
       const isTransient =
-        error.code === "P2024" || // Connection pool timeout
-        error.code === "P1017" || // Server has closed the connection
-        error.code === "P1001" || // Can't reach database server
-        error.message?.includes("timer has gone away") ||
-        error.message?.includes("PANIC") ||
-        error.message?.includes("Connection refused");
+        prismaError.code === "P2024" || // Connection pool timeout
+        prismaError.code === "P1017" || // Server has closed the connection
+        prismaError.code === "P1001" || // Can't reach database server
+        prismaError.message?.includes("timer has gone away") ||
+        prismaError.message?.includes("PANIC") ||
+        prismaError.message?.includes("Connection refused");
 
       if (isTransient && attempt < retries) {
         console.warn(
           `[Prisma] Transient error (attempt ${attempt + 1}/${retries + 1}), retrying in ${delayMs}ms...`,
-          error.code || error.message?.substring(0, 100)
+          prismaError.code || prismaError.message?.substring(0, 100)
         );
         await new Promise((resolve) => setTimeout(resolve, delayMs * (attempt + 1)));
 

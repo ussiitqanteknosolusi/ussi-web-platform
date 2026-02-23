@@ -43,7 +43,7 @@ export default function DeleteButton({
         } else {
              toast.error("Unknown response from server");
         }
-      } catch (error) {
+      } catch {
         toast.error("Something went wrong. Please try again.");
       }
     });

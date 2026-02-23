@@ -1,7 +1,7 @@
 import { db } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { Plus, Pencil, Eye } from "lucide-react";
 import { deletePost } from "@/actions/blog";
 import DeleteButton from "@/components/admin/DeleteButton";
 

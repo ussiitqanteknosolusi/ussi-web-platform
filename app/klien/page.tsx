@@ -1,5 +1,5 @@
 import { db } from "@/lib/prisma";
-import { unstable_cache } from "next/cache";
+// ISR via module-level revalidate export
 import TrustSignals from "@/components/sections/TrustSignals";
 import {
   Table,
