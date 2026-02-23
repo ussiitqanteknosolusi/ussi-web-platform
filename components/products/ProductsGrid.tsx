@@ -79,7 +79,7 @@ export function ProductsGrid({ products, serviceSlug, itemsPerPage = 9 }: Produc
                 
                 <Button asChild variant="outline" className="w-full">
                   <Link href={`/layanan/${serviceSlug}/${product.slug}`}>
-                    Cek Harga
+                    Lihat Detail
                   </Link>
                 </Button>
               </div>
