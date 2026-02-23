@@ -18,9 +18,12 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 // ✅ RELIABILITY: Graceful shutdown to release connections
 if (process.env.NODE_ENV === "production") {
-  process.on("beforeExit", async () => {
+  const shutdown = async () => {
     await prisma.$disconnect();
-  });
+    process.exit(0);
+  };
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }
 
 export const db = prisma;

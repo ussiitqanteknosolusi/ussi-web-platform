@@ -1,13 +1,20 @@
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
+import { existsSync } from "fs";
 import path from "path";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+const VALID_FOLDERS = ["services", "clients", "blog", "team", "profiles", "projects", "products"];
 
 export async function uploadFile(
   file: File,
   folder: string = "services"
 ): Promise<string> {
+  // Validate folder
+  if (!VALID_FOLDERS.includes(folder)) {
+    throw new Error(`Invalid upload folder: ${folder}`);
+  }
+
   // Validate file size
   if (file.size > MAX_FILE_SIZE) {
     throw new Error(`File size too large. Max allowed is 10MB.`);
@@ -45,14 +52,19 @@ export async function uploadFile(
 
 export async function deleteFile(fileUrl: string): Promise<void> {
   try {
-    // Extract filename from URL (remove leading slash)
     const relativePath = fileUrl.startsWith("/") ? fileUrl.slice(1) : fileUrl;
     const filepath = path.join(process.cwd(), "public", relativePath);
-    
-    // Check if file exists before deleting
-    const fs = require("fs");
-    if (fs.existsSync(filepath)) {
-      await import("fs/promises").then(fsPromise => fsPromise.unlink(filepath));
+    const resolved = path.resolve(filepath);
+    const publicDir = path.resolve(process.cwd(), "public");
+
+    // Prevent path traversal
+    if (!resolved.startsWith(publicDir)) {
+      console.error("Path traversal attempt blocked:", fileUrl);
+      return;
+    }
+
+    if (existsSync(resolved)) {
+      await unlink(resolved);
     }
   } catch (error) {
     console.error("Delete file error:", error);

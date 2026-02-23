@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   compress: true,
 
   images: {
+    unoptimized: true, // ✅ PERFORMANCE: Disable sharp on shared hosting to prevent thread exhaustion
     remotePatterns: [
       {
         protocol: 'https',

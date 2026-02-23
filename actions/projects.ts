@@ -5,8 +5,14 @@ import { db } from "@/lib/prisma";
 import { ProjectSchema } from "@/schemas";
 import { uploadFile, deleteFile } from "@/lib/upload";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 export async function createProject(formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   // Track uploaded files for rollback
   const uploadedFiles: string[] = [];
 
@@ -70,6 +76,11 @@ export async function createProject(formData: FormData) {
 }
 
 export async function updateProject(id: number, formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   // Track uploaded files for rollback
   const uploadedFiles: string[] = [];
 
@@ -150,6 +161,11 @@ export async function updateProject(id: number, formData: FormData) {
 }
 
 export async function deleteProject(id: number) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   try {
     const existingProject = await db.project.findUnique({
       where: { id },

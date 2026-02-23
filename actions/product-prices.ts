@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 const ProductPriceSchema = z.object({
   name: z.string().min(1, { message: "Nama paket harga diperlukan" }),
@@ -14,9 +15,21 @@ const ProductPriceSchema = z.object({
 });
 
 export async function createProductPrice(productId: number, formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   // Parse features from JSON string
   const featuresStr = formData.get("features") as string;
-  const features = featuresStr ? JSON.parse(featuresStr) : [];
+  let features: string[] = [];
+  if (featuresStr) {
+    try {
+      features = JSON.parse(featuresStr);
+    } catch {
+      return { error: "Invalid features format" };
+    }
+  }
 
   const validatedFields = ProductPriceSchema.safeParse({
     name: formData.get("name"),
@@ -56,8 +69,20 @@ export async function createProductPrice(productId: number, formData: FormData) 
 }
 
 export async function updateProductPrice(id: number, productId: number, formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   const featuresStr = formData.get("features") as string;
-  const features = featuresStr ? JSON.parse(featuresStr) : [];
+  let features: string[] = [];
+  if (featuresStr) {
+    try {
+      features = JSON.parse(featuresStr);
+    } catch {
+      return { error: "Invalid features format" };
+    }
+  }
 
   const validatedFields = ProductPriceSchema.safeParse({
     name: formData.get("name"),
@@ -97,6 +122,11 @@ export async function updateProductPrice(id: number, productId: number, formData
 }
 
 export async function deleteProductPrice(id: number, productId: number) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   try {
     await db.productPrice.delete({
       where: { id },

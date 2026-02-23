@@ -5,8 +5,14 @@ import { db } from "@/lib/prisma";
 import { ProductSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
 import { uploadFile, deleteFile } from "@/lib/upload";
+import { auth } from "@/auth";
 
 export async function createProduct(formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   // Track uploaded files for rollback
   const uploadedFiles: string[] = [];
   
@@ -38,7 +44,18 @@ export async function createProduct(formData: FormData) {
 
   // Parse features from JSON string
   const featuresStr = formData.get("features") as string;
-  const features = featuresStr ? JSON.parse(featuresStr) : [];
+  let features: string[] = [];
+  if (featuresStr) {
+    try {
+      features = JSON.parse(featuresStr);
+    } catch {
+      // Cleanup any files uploaded before the error
+      if (uploadedFiles.length > 0) {
+        await Promise.all(uploadedFiles.map(file => deleteFile(file)));
+      }
+      return { error: "Invalid features format" };
+    }
+  }
 
   const validatedFields = ProductSchema.safeParse({
     name: formData.get("name"),
@@ -142,6 +159,11 @@ async function generateUniqueSlug(baseSlug: string): Promise<string> {
 
 
 export async function updateProduct(id: number, formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   // Track uploaded files for rollback
   const uploadedFiles: string[] = [];
 
@@ -178,7 +200,18 @@ export async function updateProduct(id: number, formData: FormData) {
 
   // Parse features from JSON string
   const featuresStr = formData.get("features") as string;
-  const features = featuresStr ? JSON.parse(featuresStr) : [];
+  let features: string[] = [];
+  if (featuresStr) {
+    try {
+      features = JSON.parse(featuresStr);
+    } catch {
+      // Cleanup any files uploaded before the error
+      if (uploadedFiles.length > 0) {
+        await Promise.all(uploadedFiles.map(file => deleteFile(file)));
+      }
+      return { error: "Invalid features format" };
+    }
+  }
 
   const validatedFields = ProductSchema.safeParse({
     name: formData.get("name"),
@@ -264,6 +297,11 @@ export async function updateProduct(id: number, formData: FormData) {
 }
 
 export async function deleteProduct(id: number) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   try {
     const existingProduct = await db.product.findUnique({
       where: { id },

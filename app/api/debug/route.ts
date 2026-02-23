@@ -1,10 +1,16 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 
 export const dynamic = 'force-dynamic'; // Ensure it's not cached
 
 export async function GET() {
+  const session = await auth();
+  if (!session || (session.user as any)?.role !== "SUPERADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const status: any = {
     serverTime: new Date().toISOString(),
     env: {

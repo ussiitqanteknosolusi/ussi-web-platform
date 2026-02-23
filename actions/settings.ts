@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { revalidateTag } from "next/cache";
+import { auth } from "@/auth";
 
 export async function getSettings() {
   const settings = await db.setting.findMany({
@@ -18,6 +19,11 @@ export async function getSettings() {
 }
 
 export async function updateSettings(formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { success: false, message: "Unauthorized" };
+  }
+
   const entries = Array.from(formData.entries());
   
   try {

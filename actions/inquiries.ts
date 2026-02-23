@@ -2,8 +2,14 @@
 
 import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 export async function updateInquiryStatus(id: number, status: "New" | "Processed" | "Closed") {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   try {
     await db.inquiry.update({
       where: { id },
@@ -19,6 +25,11 @@ export async function updateInquiryStatus(id: number, status: "New" | "Processed
 }
 
 export async function deleteInquiry(id: number) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   try {
     await db.inquiry.delete({
       where: { id },

@@ -5,8 +5,14 @@ import { db } from "@/lib/prisma";
 import { ServiceSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
 import { uploadFile, deleteFile } from "@/lib/upload";
+import { auth } from "@/auth";
 
 export async function createService(formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   // Track uploaded files for rollback
   const uploadedFiles: string[] = [];
 
@@ -45,7 +51,7 @@ export async function createService(formData: FormData) {
   const { title, slug, description, metaDescription, heroImage, isActive } = validatedFields.data;
 
   // Generate Slug if not provided
-  const finalSlug = slug || title.toLowerCase().replace(/ /g, "-");
+  const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
   try {
     await db.service.create({
@@ -73,6 +79,11 @@ export async function createService(formData: FormData) {
 
 
 export async function updateService(id: number, formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   // Track uploaded files for rollback
   const uploadedFiles: string[] = [];
 
@@ -159,6 +170,11 @@ export async function updateService(id: number, formData: FormData) {
 }
 
 export async function deleteService(id: number) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   try {
     const existingService = await db.service.findUnique({
       where: { id },

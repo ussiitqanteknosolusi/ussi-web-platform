@@ -31,9 +31,9 @@ export const viewport = {
 import { Navbar } from "@/components/layout/Navbar";
 import { FooterWrapper } from "@/components/layout/FooterWrapper";
 import { Footer } from "@/components/layout/Footer";
-import { auth } from "@/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { Suspense } from "react";
+import AuthProvider from "@/components/providers/AuthProvider";
 
 import NextTopLoader from "nextjs-toploader";
 
@@ -42,13 +42,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
 
   return (
     <html lang="id" className="max-w-full w-full overflow-x-hidden">
       <body
         className={`font-sans antialiased overflow-x-hidden w-full max-w-full`}
       >
+        <AuthProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -85,14 +85,15 @@ export default async function RootLayout({
           speed={200}
           shadow="0 0 10px #DC143C,0 0 5px #DC143C"
         />
-        <Navbar user={session?.user} />
-        <Suspense>
+        <Navbar />
+        <Suspense fallback={<div className="min-h-screen" />}>
           {children}
         </Suspense>
         <FooterWrapper>
           <Footer />
         </FooterWrapper>
         <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

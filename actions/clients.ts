@@ -5,6 +5,7 @@ import { db } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadFile, deleteFile } from "@/lib/upload";
 import { Client } from "@prisma/client";
+import { auth } from "@/auth";
 
 const ClientSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -14,6 +15,11 @@ const ClientSchema = z.object({
 });
 
 export async function createClient(formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   const validatedFields = ClientSchema.safeParse({
     name: formData.get("name"),
     industry: formData.get("industry"),
@@ -33,7 +39,7 @@ export async function createClient(formData: FormData) {
 
   if (logoFile && logoFile.size > 0) {
     try {
-      logoUrl = await uploadFile(logoFile, "client_logo");
+      logoUrl = await uploadFile(logoFile, "clients");
     } catch (error) {
       return { error: "Failed to upload logo." };
     }
@@ -60,6 +66,11 @@ export async function createClient(formData: FormData) {
 }
 
 export async function updateClient(id: number, formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   const validatedFields = ClientSchema.safeParse({
     name: formData.get("name"),
     industry: formData.get("industry"),
@@ -83,7 +94,7 @@ export async function updateClient(id: number, formData: FormData) {
       if (existingLogoUrl) {
         await deleteFile(existingLogoUrl);
       }
-      logoUrl = await uploadFile(logoFile, "client_logo");
+      logoUrl = await uploadFile(logoFile, "clients");
     } catch (error) {
       return { error: "Failed to upload logo." };
     }
@@ -110,6 +121,11 @@ export async function updateClient(id: number, formData: FormData) {
 }
 
 export async function deleteClient(id: number) {
+  const session = await auth();
+  if (!session) {
+    return { error: "Unauthorized" };
+  }
+
   try {
     const client = await db.client.findUnique({ where: { id } });
     if (client?.logoUrl) {

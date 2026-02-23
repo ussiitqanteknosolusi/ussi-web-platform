@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 const navItems = [
   { name: "Tentang Perusahaan", href: "/tentang-kami" },
@@ -17,16 +18,10 @@ const navItems = [
   { name: "Hubungi Kami", href: "/hubungi-kami" },
 ];
 
-interface NavbarProps {
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-}
-
-export function Navbar({ user }: NavbarProps) {
+export function Navbar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const user = session?.user;
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [services, setServices] = useState<Array<{ id: number; title: string; slug: string }>>([]);
