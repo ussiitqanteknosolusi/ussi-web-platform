@@ -95,7 +95,7 @@ export default async function BlogAdminPage() {
                           asChild
                           title="Lihat"
                         >
-                          <Link href={`/blog/${post.slug}`} target="_blank">
+                          <Link href={`/artikel/${post.slug}`} target="_blank">
                              <Eye className="h-4 w-4" />
                           </Link>
                         </Button>

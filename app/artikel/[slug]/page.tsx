@@ -1,5 +1,4 @@
 import { db } from "@/lib/prisma";
-import ReactMarkdown from "react-markdown";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -60,7 +59,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     <div className="container mx-auto px-4 pt-24 pb-12 md:py-20 animate-in fade-in duration-500">
       <div className="max-w-4xl mx-auto">
         <Button asChild variant="ghost" className="mb-8 pl-0 hover:bg-transparent hover:text-primary">
-          <Link href="/blog" className="flex items-center gap-2">
+          <Link href="/artikel" className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Kembali ke Blog
           </Link>
@@ -106,9 +105,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         )}
 
-        <article className="prose prose-lg dark:prose-invert max-w-none mb-16">
-           <ReactMarkdown>{post.content}</ReactMarkdown>
-        </article>
+        <article 
+          className="prose prose-lg dark:prose-invert max-w-none mb-16"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
 
         {/* Share / Tags section could go here */}
         
@@ -122,7 +122,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                {relatedPosts.map((related) => (
                  <Link 
                    key={related.id} 
-                   href={`/blog/${related.slug}`}
+                   href={`/artikel/${related.slug}`}
                    className="group block"
                  >
                    <div className="relative aspect-video rounded-xl overflow-hidden bg-muted mb-4">
