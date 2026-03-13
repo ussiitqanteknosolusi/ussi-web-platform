@@ -11,6 +11,23 @@ const openai = new OpenAI({
 // Model name as specified by the user
 const MODEL_NAME = "openai-gpt-oss-120b";
 
+// --- RETRY LOGIC FOR RATE LIMITS ---
+async function callOpenAIWithRetry(fn: () => Promise<any>, retries = 3, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      if (error.status === 429 && i < retries - 1) {
+        console.warn(`[RETRY] Rate limit hit. Waiting ${delay}ms before attempt ${i + 2}...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2; // Bertambah lama (4 detik, lalu 8 detik)
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 // --- IN-MEMORY RATE LIMITER ---
 // Menyimpan riwayat akses IP. Format: Map<IP_Address, { count: number, resetTime: number }>
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -153,8 +170,8 @@ INSTRUKSI PENTING:
       { role: "user", content: message },
     ];
 
-    // 5. Call OpenAI with tools
-    const response = await openai.chat.completions.create({
+    // 5. Call OpenAI with tools (with Retry Logic)
+    const response = await callOpenAIWithRetry(() => openai.chat.completions.create({
       model: MODEL_NAME,
       messages,
       tools: [
@@ -177,22 +194,25 @@ INSTRUKSI PENTING:
         },
       ],
       tool_choice: "auto",
-    });
+    }));
 
     const aiResponse = response.choices[0].message;
 
     // 6. Handle Tool Calls
     if (aiResponse.tool_calls && aiResponse.tool_calls.length > 0) {
       const toolCall = aiResponse.tool_calls[0];
+      
       if (toolCall.type === "function" && toolCall.function.name === "create_inquiry") {
+        let toolResult;
         try {
+            // SAFE PARSING: Prevent crash on malformed AI output
             const args = JSON.parse(toolCall.function.arguments);
             
-            // Simpan ke database inquiries
+            // DATABASE EXECUTION
             await db.inquiry.create({
               data: {
                 fullName: args.fullName,
-                email: "-",
+                email: "-", // Default placeholder
                 phone: args.phone,
                 companyName: args.companyName,
                 message: args.message || "Tertarik melalui Chat AI",
@@ -200,50 +220,52 @@ INSTRUKSI PENTING:
               },
             });
 
-            // Beri tahu AI bahwa data sudah disimpan
-            const secondResponse = await openai.chat.completions.create({
-                model: MODEL_NAME,
-                messages: [
-                    ...messages,
-                    aiResponse,
-                    {
-                        role: "tool",
-                        tool_call_id: toolCall.id,
-                        content: "Data prospek berhasil disimpan ke database. Beritahu user dengan ramah bahwa tim sales kami akan segera menghubungi mereka."
-                    }
-                ],
-            });
-
-            const finalContent = secondResponse.choices[0].message.content || "";
-            
-            // Save final messages log
-            await db.aiChatMessage.createMany({
-              data: [
-                { sessionId: currentSessionId, role: "user", content: message },
-                { sessionId: currentSessionId, role: "assistant", content: finalContent },
-              ],
-            }).catch(console.error);
-
-            return NextResponse.json({
-              content: finalContent,
-              sessionId: currentSessionId,
-            });
-
+            toolResult = "SUCCESS: Data prospek berhasil disimpan. Beritahu user tim sales akan menghubungi mereka.";
         } catch (e) {
-            console.error("Tool execution error:", e);
+            console.error("Agent Tool Execution Error:", e);
+            toolResult = `ERROR: Gagal menyimpan data. Pastikan format benar. Error: ${e instanceof Error ? e.message : "Internal Error"}`;
         }
+
+        // SECOND STEP: Agent Observes Tool Result & Responds
+        const secondResponse = await callOpenAIWithRetry(() => openai.chat.completions.create({
+          model: MODEL_NAME,
+          messages: [
+            ...messages,
+            aiResponse,
+            {
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: toolResult
+            }
+          ],
+        }));
+
+        const finalContent = secondResponse.choices[0].message.content || "Terima kasih, data Anda sudah kami terima.";
+        
+        // Log final conversation
+        await db.aiChatMessage.createMany({
+          data: [
+            { sessionId: currentSessionId, role: "user", content: message },
+            { sessionId: currentSessionId, role: "assistant", content: finalContent },
+          ],
+        }).catch(err => console.error("History logging error:", err));
+
+        return NextResponse.json({
+          content: finalContent,
+          sessionId: currentSessionId,
+        });
       }
     }
 
     // 7. Standard Response (No Tool Call)
-    const finalContent = aiResponse.content || "Maaf, saya sedang mengalami kendala teknis. Silakan hubungi kami via WhatsApp.";
+    const finalContent = aiResponse.content || "Maaf, saya tidak bisa memproses permintaan Anda saat ini.";
     
     await db.aiChatMessage.createMany({
       data: [
         { sessionId: currentSessionId, role: "user", content: message },
         { sessionId: currentSessionId, role: "assistant", content: finalContent },
       ],
-    }).catch(console.error);
+    }).catch(err => console.error("History logging error:", err));
 
     return NextResponse.json({
       content: finalContent,
