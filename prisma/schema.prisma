@@ -251,3 +251,25 @@ model ProjectImage {
 
   @@map("project_images")
 }
+
+model AiChatSession {
+  id        String          @id @default(uuid())
+  city      String?
+  country   String?
+  device    String?
+  createdAt DateTime        @default(now()) @map("created_at")
+  messages  AiChatMessage[]
+
+  @@map("ai_chat_sessions")
+}
+
+model AiChatMessage {
+  id        Int           @id @default(autoincrement())
+  sessionId String        @map("session_id")
+  role      String        // 'user' or 'assistant'
+  content   String        @db.Text
+  createdAt DateTime      @default(now()) @map("created_at")
+  session   AiChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("ai_chat_messages")
+}

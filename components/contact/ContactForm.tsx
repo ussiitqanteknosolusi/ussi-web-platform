@@ -31,6 +31,7 @@ export function ContactForm() {
       phone: "",
       company: "",
       message: "",
+      website: "", // Honeypot default
     },
   });
 
@@ -143,6 +144,22 @@ export function ContactForm() {
             </FormItem>
           )}
         />
+
+        {/* HONEYPOT FIELD (Bot Trap) - Invisible to Humans */}
+        <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }} aria-hidden="true">
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website</FormLabel>
+                <FormControl>
+                  <Input tabIndex={-1} autoComplete="off" placeholder="Your Website URL" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
 
         {error && (
           <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium">

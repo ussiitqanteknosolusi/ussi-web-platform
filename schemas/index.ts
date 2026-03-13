@@ -12,17 +12,19 @@ export const LoginSchema = z.object({
 export const InquirySchema = z.object({
   name: z.string().min(3, {
     message: "Nama minimal 3 karakter",
-  }),
+  }).max(100, "Nama terlalu panjang"),
   email: z.string().email({
     message: "Email tidak valid",
-  }),
+  }).max(100),
   phone: z.string().min(10, {
     message: "Nomor telepon minimal 10 digit",
-  }),
-  company: z.optional(z.string()),
+  }).max(20),
+  company: z.optional(z.string().max(100)),
   message: z.string().min(10, {
     message: "Pesan minimal 10 karakter",
-  }),
+  }).max(2000, "Pesan terlalu panjang (Maks 2000 karakter)"),
+  // HONEYPOT FIELD (Bot Trap)
+  website: z.string().optional(),
 });
 
 export const ProjectSchema = z.object({

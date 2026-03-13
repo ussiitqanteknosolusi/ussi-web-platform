@@ -36,6 +36,7 @@ import { Suspense } from "react";
 import AuthProvider from "@/components/providers/AuthProvider";
 
 import NextTopLoader from "nextjs-toploader";
+import { AiChatWidget } from "@/components/chat/AiChatWidget";
 
 export default async function RootLayout({
   children,
@@ -93,7 +94,9 @@ export default async function RootLayout({
           <Footer />
         </FooterWrapper>
         <Toaster />
+        <AiChatWidget />
         </AuthProvider>
+
       </body>
     </html>
   );

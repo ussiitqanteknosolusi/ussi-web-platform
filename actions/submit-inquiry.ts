@@ -13,7 +13,14 @@ export const submitInquiry = async (values: z.infer<typeof InquirySchema>) => {
     return { error: "Kolom tidak valid!" };
   }
 
-  const { name, email, phone, company, message } = validatedFields.data;
+  const { name, email, phone, company, message, website } = validatedFields.data;
+
+  // HONEYPOT CHECK: If the 'website' field is filled, it's a bot.
+  if (website) {
+    console.warn(`[HONEYPOT BLOCKED] Bot detected attempting to submit inquiry. Name: ${name}`);
+    // Simulate a successful response to trick the bot
+    return { success: "Pesan terkirim!" };
+  }
 
   try {
     await db.inquiry.create({
