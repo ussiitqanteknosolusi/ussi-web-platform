@@ -66,7 +66,7 @@ export default function ClientForm({ client }: ClientFormProps) {
            setOpenConfirm(false);
            router.push("/admin/clients");
         }
-      } catch (error) {
+      } catch {
         toast.error("Something went wrong");
         setOpenConfirm(false);
       }

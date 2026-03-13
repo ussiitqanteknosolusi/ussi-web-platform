@@ -43,6 +43,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
     <div className="border-b bg-muted/40 p-2 flex flex-wrap gap-1 items-center sticky top-0 z-10">
       <div className="flex items-center gap-1 border-r pr-2 mr-1">
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("bold") ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -52,6 +53,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <Bold className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("italic") ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -61,6 +63,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <Italic className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("underline") ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -70,6 +73,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <UnderlineIcon className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("strike") ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -82,6 +86,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
       <div className="flex items-center gap-1 border-r pr-2 mr-1">
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("heading", { level: 1 }) ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -91,6 +96,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <Heading1 className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("heading", { level: 2 }) ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -100,6 +106,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <Heading2 className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("heading", { level: 3 }) ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
@@ -112,6 +119,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
       <div className="flex items-center gap-1 border-r pr-2 mr-1">
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("bulletList") ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -121,6 +129,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <List className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("orderedList") ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -130,6 +139,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <ListOrdered className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive("blockquote") ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
@@ -142,6 +152,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
       <div className="flex items-center gap-1 border-r pr-2 mr-1">
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive({ textAlign: "left" }) ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().setTextAlign("left").run()}
@@ -151,6 +162,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <AlignLeft className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive({ textAlign: "center" }) ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().setTextAlign("center").run()}
@@ -160,6 +172,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <AlignCenter className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive({ textAlign: "right" }) ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().setTextAlign("right").run()}
@@ -169,6 +182,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
           <AlignRight className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           size="sm"
           variant={editor.isActive({ textAlign: "justify" }) ? "secondary" : "ghost"}
           onClick={() => editor.chain().focus().setTextAlign("justify").run()}
@@ -181,6 +195,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
       <div className="flex items-center gap-1 border-r pr-2 mr-1">
          <Button
+            type="button"
             size="sm"
             variant="ghost"
             className={cn("h-9 w-9 p-0", editor.isActive("link") && "bg-accent text-accent-foreground")}
@@ -198,6 +213,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
             <LinkIcon className="h-4 w-4" />
          </Button>
          <Button
+            type="button"
             size="sm"
             variant="ghost"
             className="h-9 w-9 p-0"
@@ -214,6 +230,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
 
       <div className="ml-auto flex items-center gap-1">
          <Button
+            type="button"
             size="sm"
             variant="ghost"
             onClick={() => editor.chain().focus().undo().run()}
@@ -222,6 +239,7 @@ const Toolbar = ({ editor }: { editor: Editor | null }) => {
             <Undo className="h-4 w-4" />
          </Button>
          <Button
+            type="button"
             size="sm"
             variant="ghost"
             onClick={() => editor.chain().focus().redo().run()}

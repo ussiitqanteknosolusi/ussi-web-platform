@@ -18,7 +18,7 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps) {
-  const [{ slug, productSlug }, settings] = await Promise.all([
+  const [{ productSlug }, settings] = await Promise.all([
     params,
     getSiteSettings()
   ]);
@@ -216,7 +216,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h2 className="text-3xl font-bold mb-8 text-center">Fitur Produk</h2>
             <div className="grid md:grid-cols-2 gap-4">
 
-              {(features as any[]).map((feature, index) => (
+              {(features as string[]).map((feature, index) => (
                 <div
                   key={index}
                   className="flex items-start gap-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors"

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Edit, Plus, Trash2 } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import Image from "next/image";
 import { deleteProject } from "@/actions/projects";
 import DeleteButton from "@/components/admin/DeleteButton";

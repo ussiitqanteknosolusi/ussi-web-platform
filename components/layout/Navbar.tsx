@@ -41,7 +41,7 @@ export function Navbar() {
     // Fetch active services for dropdown
     fetch("/api/services")
       .then(res => res.json())
-      .then(data => setServices(data.filter((s: any) => s.isActive)))
+      .then(data => setServices(data.filter((s: Record<string, unknown>) => s.isActive)))
       .catch(err => console.error("Failed to fetch services:", err));
   }, []);
 

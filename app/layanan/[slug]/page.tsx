@@ -1,10 +1,6 @@
 import { db } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 
 // ✅ PERFORMANCE: ISR — revalidate every 5 minutes

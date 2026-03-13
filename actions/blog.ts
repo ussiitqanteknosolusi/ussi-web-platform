@@ -78,7 +78,7 @@ export async function createPost(formData: FormData) {
   }
 
   revalidatePath("/admin/blog");
-  revalidatePath("/blog");
+  revalidatePath("/artikel");
   return { success: "Post created successfully!" };
 }
 
@@ -170,7 +170,7 @@ export async function updatePost(id: number, formData: FormData) {
   }
 
   revalidatePath("/admin/blog");
-  revalidatePath("/blog");
+  revalidatePath("/artikel");
   return { success: "Post updated successfully!" };
 }
 
@@ -190,7 +190,7 @@ export async function deletePost(id: number) {
     await db.post.delete({ where: { id } });
     
     revalidatePath("/admin/blog");
-    revalidatePath("/blog");
+    revalidatePath("/artikel");
     return { success: "Post deleted!" };
   } catch (error) {
     return { error: "Failed to delete post." };

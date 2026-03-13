@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Users, Zap, Shield, Target, History } from "lucide-react";
+import { CheckCircle, Users, Zap, Shield, Target } from "lucide-react";
 import Link from "next/link";
 
 // ✅ PERFORMANCE: Removed "use client" — this page is 100% static content,

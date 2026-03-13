@@ -1,9 +1,8 @@
 "use client";
 
 import { Server, Smartphone, CreditCard, ArrowRight, MessageSquare, Mail, ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";

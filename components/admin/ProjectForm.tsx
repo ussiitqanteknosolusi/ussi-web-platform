@@ -98,7 +98,7 @@ export default function ProjectForm({ initialData }: ProjectFormProps) {
           setOpenConfirm(false);
           router.push("/admin/projects");
         }
-      } catch (e) {
+      } catch {
         toast.error("Something went wrong!");
         setOpenConfirm(false);
       }

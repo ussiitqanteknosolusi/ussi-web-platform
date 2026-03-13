@@ -1,7 +1,7 @@
 import { db } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import Image from "next/image";
 import { deleteClient } from "@/actions/clients";
 import DeleteButton from "@/components/admin/DeleteButton";
@@ -49,7 +49,7 @@ export default async function ClientsPage() {
             {clients.length === 0 ? (
               <tr>
                 <td colSpan={5} className="text-center p-8 text-muted-foreground">
-                  Belum ada klien. Klik "Tambah Klien" untuk membuat yang pertama.
+                  Belum ada klien. Klik &quot;Tambah Klien&quot; untuk membuat yang pertama.
                 </td>
               </tr>
             ) : (

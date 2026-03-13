@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useState, useEffect } from "react";
+import { useTransition, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,7 @@ interface ProductFormProps {
     thumbnail: string | null;
     detailImage: string | null;
     price?: number | null;
-    features: any;
+    features: unknown;
     isActive: boolean;
   };
   services: Array<{ id: number; title: string }>;
@@ -43,7 +43,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 export default function ProductForm({ initialData, services }: ProductFormProps) {

@@ -43,7 +43,7 @@ export default function LeadForm() {
         setSuccess(true);
         form.reset();
       }
-    } catch (err) {
+    } catch {
       setError("Terjadi kesalahan, silakan coba lagi.");
     }
   };

@@ -7,11 +7,11 @@ export const dynamic = 'force-dynamic'; // Ensure it's not cached
 
 export async function GET() {
   const session = await auth();
-  if (!session || (session.user as any)?.role !== "SUPERADMIN") {
+  if (!session || (session.user as unknown as Record<string, unknown>)?.role !== "SUPERADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const status: any = {
+  const status: Record<string, unknown> = {
     serverTime: new Date().toISOString(),
     env: {
       NODE_ENV: process.env.NODE_ENV,
@@ -25,9 +25,9 @@ export async function GET() {
     // fast check
     await prisma.$queryRaw`SELECT 1`;
     status.database = "connected";
-  } catch (error: any) {
+  } catch (error: unknown) {
     status.database = "error";
-    status.dbError = error.message;
+    status.dbError = error instanceof Error ? error.message : String(error);
   }
 
   return NextResponse.json(status);
