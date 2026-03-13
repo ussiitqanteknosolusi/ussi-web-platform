@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Bot, Minimize2 } from "lucide-react";
+import { Send, Bot, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -219,10 +219,10 @@ export function AiChatWidget() {
           <motion.button
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              whileHover={{ scale: 1.05, boxShadow: "0 10px 25px -5px rgba(13, 42, 31, 0.4)" }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsOpen(true)}
-              className="h-16 w-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 border-4 border-white bg-[#0d2a1f] text-white"
+              className="h-16 w-16 rounded-full flex items-center justify-center transition-all duration-300 border-4 border-white bg-[#0d2a1f] text-white"
           >
               <Bot size={32} color="white" strokeWidth={2} />
               {messages.length === 0 && (

@@ -98,13 +98,18 @@ export async function POST(req: Request) {
     ]);
 
     // 3. Fetch History
-    let history: any[] = [];
+    let history: OpenAI.Chat.Completions.ChatCompletionMessage[] = [];
     try {
-        history = await db.aiChatMessage.findMany({
+        const fetchedHistory = await db.aiChatMessage.findMany({
             where: { sessionId: currentSessionId },
             orderBy: { createdAt: "asc" },
             take: 15, // Keep last 15 messages for context
         });
+        // Map Prisma model to OpenAI type
+        history = fetchedHistory.map(h => ({
+            role: h.role as "user" | "assistant",
+            content: h.content,
+        })) as OpenAI.Chat.Completions.ChatCompletionMessage[];
     } catch (e) {
         console.error("History fetch error:", e);
     }
@@ -142,7 +147,7 @@ INSTRUKSI PENTING:
 - Jangan memberikan informasi di luar lingkup USSI ITS.
 `;
 
-    const messages: any[] = [
+    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },
       ...history.map((h) => ({ role: h.role, content: h.content })),
       { role: "user", content: message },
@@ -179,7 +184,7 @@ INSTRUKSI PENTING:
     // 6. Handle Tool Calls
     if (aiResponse.tool_calls && aiResponse.tool_calls.length > 0) {
       const toolCall = aiResponse.tool_calls[0];
-      if (toolCall.function.name === "create_inquiry") {
+      if (toolCall.type === "function" && toolCall.function.name === "create_inquiry") {
         try {
             const args = JSON.parse(toolCall.function.arguments);
             
@@ -245,10 +250,11 @@ INSTRUKSI PENTING:
       sessionId: currentSessionId,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Chat API Error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan tidak dikenal.";
     return NextResponse.json(
-      { error: "Terjadi kesalahan pada server AI.", details: error.message },
+      { error: "Terjadi kesalahan pada server AI.", details: errorMessage },
       { status: 500 }
     );
   }
