@@ -12,12 +12,12 @@ const openai = new OpenAI({
 const MODEL_NAME = "openai-gpt-oss-120b";
 
 // --- RETRY LOGIC FOR RATE LIMITS ---
-async function callOpenAIWithRetry(fn: () => Promise<any>, retries = 3, delay = 2000) {
+async function callOpenAIWithRetry<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Promise<T> {
   for (let i = 0; i < retries; i++) {
     try {
       return await fn();
-    } catch (error: any) {
-      if (error.status === 429 && i < retries - 1) {
+    } catch (error: unknown) {
+      if (typeof error === "object" && error !== null && "status" in error && error.status === 429 && i < retries - 1) {
         console.warn(`[RETRY] Rate limit hit. Waiting ${delay}ms before attempt ${i + 2}...`);
         await new Promise(resolve => setTimeout(resolve, delay));
         delay *= 2; // Bertambah lama (4 detik, lalu 8 detik)
@@ -26,6 +26,7 @@ async function callOpenAIWithRetry(fn: () => Promise<any>, retries = 3, delay = 
       throw error;
     }
   }
+  throw new Error("Max retries reached");
 }
 
 // --- IN-MEMORY RATE LIMITER ---
