@@ -6,27 +6,36 @@ import { getSiteSettings } from "@/lib/settings";
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   baseURL: process.env.OPENAI_BASE_URL,
+  defaultHeaders: {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json",
+  }
 });
 
 // Model name as specified by the user
 const MODEL_NAME = "openai-gpt-oss-120b";
 
 // --- RETRY LOGIC FOR RATE LIMITS ---
-async function callOpenAIWithRetry<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Promise<T> {
+async function callOpenAIWithRetry<T>(fn: () => Promise<T>, retries = 5, delay = 3000): Promise<T> {
   for (let i = 0; i < retries; i++) {
     try {
       return await fn();
     } catch (error: unknown) {
-      if (typeof error === "object" && error !== null && "status" in error && error.status === 429 && i < retries - 1) {
-        console.warn(`[RETRY] Rate limit hit. Waiting ${delay}ms before attempt ${i + 2}...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= 2; // Bertambah lama (4 detik, lalu 8 detik)
+      // Deteksi error 429 atau error koneksi lainnya
+      const isRateLimit = typeof error === "object" && error !== null && "status" in error && error.status === 429;
+      
+      if (isRateLimit && i < retries - 1) {
+        const jitter = Math.floor(Math.random() * 1500); // Tambahkan jeda acak
+        const waitTime = delay + jitter;
+        console.warn(`[RETRY] API busy (429). Waiting ${waitTime}ms before attempt ${i + 2}/5...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        delay *= 2; // Bertambah lama secara eksponensial (3s, 6s, 12s...)
         continue;
       }
       throw error;
     }
   }
-  throw new Error("Max retries reached");
+  throw new Error("Sistem sedang sangat sibuk. Silakan coba sesaat lagi.");
 }
 
 // --- IN-MEMORY RATE LIMITER ---
