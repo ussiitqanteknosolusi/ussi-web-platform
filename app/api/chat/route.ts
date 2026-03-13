@@ -21,15 +21,15 @@ async function callOpenAIWithRetry<T>(fn: () => Promise<T>, retries = 5, delay =
     try {
       return await fn();
     } catch (error: unknown) {
-      // Deteksi error 429 atau error koneksi lainnya
-      const isRateLimit = typeof error === "object" && error !== null && "status" in error && error.status === 429;
+      // Deteksi error 429 secara lebih akurat pada objek error OpenAI
+      const status = (error as { status?: number })?.status;
       
-      if (isRateLimit && i < retries - 1) {
-        const jitter = Math.floor(Math.random() * 1500); // Tambahkan jeda acak
+      if (status === 429 && i < retries - 1) {
+        const jitter = Math.floor(Math.random() * 1500);
         const waitTime = delay + jitter;
-        console.warn(`[RETRY] API busy (429). Waiting ${waitTime}ms before attempt ${i + 2}/5...`);
+        console.warn(`[RETRY] IP Hosting sibuk. Mencoba lagi dalam ${waitTime}ms... (${i + 2}/5)`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
-        delay *= 2; // Bertambah lama secara eksponensial (3s, 6s, 12s...)
+        delay *= 2; 
         continue;
       }
       throw error;
@@ -166,11 +166,12 @@ ${projectsContext}
 
 INSTRUKSI PENTING:
 - Gunakan Bahasa Indonesia yang FORMAL dan PROFESIONAL.
-- JANGAN GUNAKAN FORMAT MARKDOWN (seperti **, #, -, atau list). Kirimkan jawaban dalam teks biasa (plain text) yang bersih.
+- Gunakan FORMAT MARKDOWN untuk membuat jawaban lebih mudah dibaca (gunakan bold **teks** untuk poin penting, gunakan bullet points untuk daftar layanan, dsb).
+- Berikan jawaban yang terstruktur dan rapi agar pengunjung nyaman membaca di website.
 - Fokus pada solusi IBS Core System, Mobile Banking, dan digitalisasi lembaga keuangan.
 - Jika pengunjung tertarik pada produk atau bertanya tentang harga, mintalah data mereka: Nama Lengkap, Nomor WhatsApp, dan Nama Instansi (BPR/Koperasi).
 - Setelah mendeteksi Nama, Nomor WhatsApp, dan Nama Instansi, gunakan tool 'create_inquiry' untuk menyimpan data calon klien tersebut.
-- Jika pengguna ingin berbicara dengan manusia, berikan link WhatsApp Kami: ${settings.whatsapp_url}
+- Jika pengguna ingin berbicara dengan manusia, berikan link WhatsApp Kami: [Hubungi Tim Sales di WhatsApp](${settings.whatsapp_url}) (Pastikan menggunakan format markdown [Teks](URL) agar muncul sebagai tombol).
 - Jangan memberikan informasi di luar lingkup USSI ITS.
 `;
 
@@ -180,7 +181,7 @@ INSTRUKSI PENTING:
       { role: "user", content: message },
     ];
 
-    // 5. Call OpenAI with tools (with Retry Logic)
+    // 5. Call OpenAI with tools (with Retry & IP Passthrough)
     const response = await callOpenAIWithRetry(() => openai.chat.completions.create({
       model: MODEL_NAME,
       messages,
@@ -204,6 +205,13 @@ INSTRUKSI PENTING:
         },
       ],
       tool_choice: "auto",
+    }, {
+      // Meneruskan IP asli user ke Gateway agar tidak dianggap spam dari satu IP Hosting
+      headers: {
+        "X-Forwarded-For": ip,
+        "X-Real-IP": ip,
+        "CF-Connecting-IP": ip
+      }
     }));
 
     const aiResponse = response.choices[0].message;
@@ -236,7 +244,7 @@ INSTRUKSI PENTING:
             toolResult = `ERROR: Gagal menyimpan data. Pastikan format benar. Error: ${e instanceof Error ? e.message : "Internal Error"}`;
         }
 
-        // SECOND STEP: Agent Observes Tool Result & Responds
+        // SECOND STEP: Agent Observes Tool Result & Responds (with IP Passthrough)
         const secondResponse = await callOpenAIWithRetry(() => openai.chat.completions.create({
           model: MODEL_NAME,
           messages: [
@@ -248,6 +256,11 @@ INSTRUKSI PENTING:
               content: toolResult
             }
           ],
+        }, {
+          headers: {
+            "X-Forwarded-For": ip,
+            "X-Real-IP": ip,
+          }
         }));
 
         const finalContent = secondResponse.choices[0].message.content || "Terima kasih, data Anda sudah kami terima.";
