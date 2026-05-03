@@ -1,42 +1,10 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 import { db } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_BASE_URL,
-  defaultHeaders: {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "application/json",
-  }
-});
-
 // Model name as specified by the user
-const MODEL_NAME = "openai-gpt-oss-120b";
+const MODEL_NAME = "openai/gpt-oss-120b:free"; // Menggunakan Gemini 2.0 Flash (Stabil & Cepat)
 
-// --- RETRY LOGIC FOR RATE LIMITS ---
-async function callOpenAIWithRetry<T>(fn: () => Promise<T>, retries = 5, delay = 3000): Promise<T> {
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await fn();
-    } catch (error: unknown) {
-      // Deteksi error 429 secara lebih akurat pada objek error OpenAI
-      const status = (error as { status?: number })?.status;
-      
-      if (status === 429 && i < retries - 1) {
-        const jitter = Math.floor(Math.random() * 1500);
-        const waitTime = delay + jitter;
-        console.warn(`[RETRY] IP Hosting sibuk. Mencoba lagi dalam ${waitTime}ms... (${i + 2}/5)`);
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        delay *= 2; 
-        continue;
-      }
-      throw error;
-    }
-  }
-  throw new Error("Sistem sedang sangat sibuk. Silakan coba sesaat lagi.");
-}
 
 // --- IN-MEMORY RATE LIMITER ---
 // Menyimpan riwayat akses IP. Format: Map<IP_Address, { count: number, resetTime: number }>
@@ -125,7 +93,7 @@ export async function POST(req: Request) {
     ]);
 
     // 3. Fetch History
-    let history: OpenAI.Chat.Completions.ChatCompletionMessage[] = [];
+    let history: any[] = [];
     try {
         const fetchedHistory = await db.aiChatMessage.findMany({
             where: { sessionId: currentSessionId },
@@ -134,9 +102,9 @@ export async function POST(req: Request) {
         });
         // Map Prisma model to OpenAI type
         history = fetchedHistory.map(h => ({
-            role: h.role as "user" | "assistant",
+            role: h.role,
             content: h.content,
-        })) as OpenAI.Chat.Completions.ChatCompletionMessage[];
+        }));
     } catch (e) {
         console.error("History fetch error:", e);
     }
@@ -175,114 +143,21 @@ INSTRUKSI PENTING:
 - Jangan memberikan informasi di luar lingkup USSI ITS.
 `;
 
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: "system", content: systemPrompt },
-      ...history.map((h) => ({ role: h.role, content: h.content })),
-      { role: "user", content: message },
-    ];
+    // 5. Initialize Agent and Send Message
+    const { createAgent } = await import("@/lib/ai/agent");
+    const { defaultTools } = await import("@/lib/ai/tools");
 
-    // 5. Call OpenAI with tools (with Retry & IP Passthrough)
-    const response = await callOpenAIWithRetry(() => openai.chat.completions.create({
+    const agent = createAgent({
+      apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY || "",
       model: MODEL_NAME,
-      messages,
-      tools: [
-        {
-          type: "function",
-          function: {
-            name: "create_inquiry",
-            description: "Menyimpan data prospek/calon klien yang tertarik dengan produk USSI ITS.",
-            parameters: {
-              type: "object",
-              properties: {
-                fullName: { type: "string", description: "Nama lengkap calon klien" },
-                phone: { type: "string", description: "Nomor WhatsApp/Telepon yang bisa dihubungi" },
-                companyName: { type: "string", description: "Nama BPR atau Koperasi asal" },
-                message: { type: "string", description: "Ringkasan ketertarikan atau pertanyaan user" },
-              },
-              required: ["fullName", "phone", "companyName"],
-            },
-          },
-        },
-      ],
-      tool_choice: "auto",
-    }, {
-      // Meneruskan IP asli user ke Gateway agar tidak dianggap spam dari satu IP Hosting
-      headers: {
-        "X-Forwarded-For": ip,
-        "X-Real-IP": ip,
-        "CF-Connecting-IP": ip
-      }
-    }));
+      instructions: systemPrompt,
+      tools: defaultTools,
+      history: history.map(h => ({ role: h.role as any, content: h.content })),
+    });
 
-    const aiResponse = response.choices[0].message;
+    const finalContent = await agent.sendSync(message);
 
-    // 6. Handle Tool Calls
-    if (aiResponse.tool_calls && aiResponse.tool_calls.length > 0) {
-      const toolCall = aiResponse.tool_calls[0];
-      
-      if (toolCall.type === "function" && toolCall.function.name === "create_inquiry") {
-        let toolResult;
-        try {
-            // SAFE PARSING: Prevent crash on malformed AI output
-            const args = JSON.parse(toolCall.function.arguments);
-            
-            // DATABASE EXECUTION
-            await db.inquiry.create({
-              data: {
-                fullName: args.fullName,
-                email: "-", // Default placeholder
-                phone: args.phone,
-                companyName: args.companyName,
-                message: args.message || "Tertarik melalui Chat AI",
-                status: "New",
-              },
-            });
-
-            toolResult = "SUCCESS: Data prospek berhasil disimpan. Beritahu user tim sales akan menghubungi mereka.";
-        } catch (e) {
-            console.error("Agent Tool Execution Error:", e);
-            toolResult = `ERROR: Gagal menyimpan data. Pastikan format benar. Error: ${e instanceof Error ? e.message : "Internal Error"}`;
-        }
-
-        // SECOND STEP: Agent Observes Tool Result & Responds (with IP Passthrough)
-        const secondResponse = await callOpenAIWithRetry(() => openai.chat.completions.create({
-          model: MODEL_NAME,
-          messages: [
-            ...messages,
-            aiResponse,
-            {
-              role: "tool",
-              tool_call_id: toolCall.id,
-              content: toolResult
-            }
-          ],
-        }, {
-          headers: {
-            "X-Forwarded-For": ip,
-            "X-Real-IP": ip,
-          }
-        }));
-
-        const finalContent = secondResponse.choices[0].message.content || "Terima kasih, data Anda sudah kami terima.";
-        
-        // Log final conversation
-        await db.aiChatMessage.createMany({
-          data: [
-            { sessionId: currentSessionId, role: "user", content: message },
-            { sessionId: currentSessionId, role: "assistant", content: finalContent },
-          ],
-        }).catch(err => console.error("History logging error:", err));
-
-        return NextResponse.json({
-          content: finalContent,
-          sessionId: currentSessionId,
-        });
-      }
-    }
-
-    // 7. Standard Response (No Tool Call)
-    const finalContent = aiResponse.content || "Maaf, saya tidak bisa memproses permintaan Anda saat ini.";
-    
+    // 6. Log final conversation
     await db.aiChatMessage.createMany({
       data: [
         { sessionId: currentSessionId, role: "user", content: message },
@@ -294,6 +169,7 @@ INSTRUKSI PENTING:
       content: finalContent,
       sessionId: currentSessionId,
     });
+
 
   } catch (error: unknown) {
     console.error("Chat API Error:", error);
